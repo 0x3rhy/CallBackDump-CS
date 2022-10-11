@@ -4,7 +4,7 @@
 
 ## modified
 
-Supports passing custom encryption key in the beacon command console. If the encryption key is not specified, the default is: **fuck**
+Supports passing custom encryption key in the beacon command console. If the encryption key is not specified, the default is: **`fuck`**
 
 Dump lsass file path:  get the current cache directory (C:\ProgramData directory is used when the cache directory acquisition fails) + 12-bit random file name + .log
 
@@ -28,5 +28,4 @@ Load CallBackDump.cna in the bin directory
 
 * https://github.com/seventeenman/CallBackDump
 * https://github.com/outflanknl/Zipper
-
 
