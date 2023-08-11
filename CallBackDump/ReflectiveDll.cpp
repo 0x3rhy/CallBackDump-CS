@@ -191,7 +191,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD dwReason, LPVOID lpReserved)
 		}
 		nt_callback(key);
 		fflush(stdout);
-		ExitProcess(0);
+		//ExitProcess(0);
 		break;
 	case DLL_PROCESS_DETACH:
 	case DLL_THREAD_ATTACH:
