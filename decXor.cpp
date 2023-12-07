@@ -1,14 +1,22 @@
 #include <iostream>
 #include <fstream>
 
-char* Xorcrypt(char* content, size_t length, const char* secretKey, size_t keyLength)
+
+size_t my_strlen(const char* str) {
+	size_t len = 0;
+	while (str[len] != '\0') {
+		len++;
+	}
+	return len;
+}
+
+void Xorcrypt(char* content, size_t length, const char* secretKey, size_t keyLength)
 {
     for (size_t i = 0; i < length; i++)
     {
         content[i] ^= secretKey[i % keyLength];
     }
 
-    return content;
 }
 
 void XorcryptFile(const std::string& filename, const char* secretKey, size_t keyLength)
@@ -56,7 +64,7 @@ int main(int args, char* argv[])
 {
     std::string filename = argv[1];  // Replace with your file name
     const char* secretKey = argv[2];   // Replace with your secret key
-    size_t keyLength = sizeof(secretKey);
+    size_t keyLength = my_strlen(secretKey);
 
     XorcryptFile(filename, secretKey, keyLength);
 

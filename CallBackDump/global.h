@@ -50,14 +50,3 @@ typedef BOOL(WINAPI* _MiniDumpWriteDump)(
 
 _MiniDumpWriteDump MMiniDumpWriteDump = (_MiniDumpWriteDump)GetProcAddress(
     LoadLibraryA("Dbghelp.dll"), "MiniDumpWriteDump");
-
-
-extern char* Xorcrypt(char* content, DWORD length, char* secretKey)
-{
-    for (UINT i = 0; i < length; i++)
-    {
-        content[i] ^= secretKey[i % sizeof(secretKey)];
-    }
-
-    return content;
-}
